@@ -14,7 +14,7 @@
 #include "ServoEaser.h"
 #include <math.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 // FIXME: this debug setup sucks
 #if (DEBUG > 0)
@@ -71,6 +71,9 @@ void ServoEaser::begin(Servo s, int frameTime)
 
     easingFunc = ServoEaser_easeInOutCubic;
     arrivedFunc = NULL;
+
+	min_in = MIN_IN;
+	max_in = MAX_IN;
 
     useMicros = false;
 
@@ -184,10 +187,12 @@ void ServoEaser::update()
     if( tick == tickCount ) { // time for new position
         getNextPos(); 
     }
-    float p = (flipped) ? 180.0 - currPos : currPos;
+    float p = (flipped) ? (float)(max_in+min_in) - currPos : currPos;
+    if ( p < min_in ) p = min_in;
+    if ( p > max_in ) p = max_in;
     if( useMicros ) {
         servo.writeMicroseconds( angleToMicros(p) );
-    } else {
+    } else {   
         servo.write( p );
     }
 }
@@ -204,15 +209,16 @@ void ServoEaser::setMinMaxMicroseconds(int mi, int ma)
 #define SERVO_MIN() (MIN_PULSE_WIDTH - this->min * 4)  // min value in uS 
 #define SERVO_MAX() (MAX_PULSE_WIDTH - this->max * 4)  // max value in uS
 
-#define in_min 0
-#define in_max 180
+// replaced by instance variables
+//#define in_min 0 
+//#define in_max 180
 #define out_min SERVO_MIN()
 #define out_max SERVO_MAX()
 int ServoEaser::angleToMicros(float angle)
 {
     //                 x   in_min,in_max, out_min, out_max
     //int value = map(value, 0, 180, SERVO_MIN(),  SERVO_MAX());
-    return (angle-in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    return (angle-min_in) * (out_max - out_min) / (max_in - min_in) + out_min;
 }
 
 //

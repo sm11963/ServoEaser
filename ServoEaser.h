@@ -35,6 +35,10 @@
 
 #include <Servo.h>
 
+// These are used to correct for servos that a throw less than 180
+#define MIN_IN 0   // Default minimum actual angle of the servo
+#define MAX_IN 120 // Default maximum actual angle of the servo
+
 // simple struct to encapsulate a servo move 
 typedef struct _servoMove {
     int pos;   // position of servo in degrees
@@ -84,6 +88,9 @@ private:
 
     void getNextPos();
     int angleToMicros(float angle);
+
+	int8_t min_in; // minimum actual angle of the servo
+	int8_t max_in; // maximum actual angle of the servo
 
     // duplicate Servo min/max micros functionality
     int8_t min;   // minimum is this value times 4 added to MIN_PULSE_WIDTH    
